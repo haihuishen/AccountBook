@@ -125,8 +125,7 @@ public class LoginActivity extends Activity {
                         c_password = cursor.getString(1);
                         c_sex = cursor.getInt(2);
 
-                        System.out.print(c_name + ":" + c_password + ":" + c_sex);
-                        Toast.makeText(getBaseContext(), c_name + ":" + c_password + ":" + c_sex, Toast.LENGTH_SHORT);
+                        Toast.makeText(getBaseContext(), c_name + ":" + c_password + ":" + c_sex, Toast.LENGTH_SHORT).show();
 
                         if (mRemember.isChecked()) {
                             SharePrefUtil.saveBoolean(getBaseContext(), SharePrefUtil.KEY.REMEMBER_ISCHECK, mRemember.isChecked());
@@ -146,11 +145,8 @@ public class LoginActivity extends Activity {
                         finish();
                     }
                     else{
-                        System.out.print("用户或密码错误");
-                        Toast.makeText(getBaseContext(),"用户或密码错误", Toast.LENGTH_SHORT);
+                        Toast.makeText(getBaseContext(),"用户或密码错误", Toast.LENGTH_SHORT).show();
                     }
-                    System.out.print("???");
-                    Toast.makeText(getBaseContext(),"???", Toast.LENGTH_SHORT);
                     cursor.close();
                 }
 //                Toast.makeText(LoginActivity.this,
