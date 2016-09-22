@@ -18,7 +18,7 @@ public class BaseEx implements BaseInterface {
 
 	private DatabaseHelper dbHelper = null;
 	private SQLiteDatabase db = null;
-	private Context mContext = null;
+	public Context mContext = null;
 
 	private int dbVersion = 1;
 
@@ -37,7 +37,7 @@ public class BaseEx implements BaseInterface {
      * 打开数据库
      */
 	public void openDBConnect() {
-		dbHelper = new DatabaseHelper(mContext, Constant.DB_NAME, dbVersion);
+		dbHelper = new DatabaseHelper(mContext, Constant.DB_NAME, 1);
 		db = dbHelper.getWritableDatabase();
 	}
 
@@ -54,23 +54,23 @@ public class BaseEx implements BaseInterface {
 	}
 
 	@Override
-	public void Add(ContentValues values) {
-
+	public long Add(String table, ContentValues values) {
+        return 0;
 	}
 
 	@Override
-	public void Update(ContentValues values, String whereClause,
+	public void Update(String table, ContentValues values, String whereClause,
                        String[] whereArgs) {
 
 	}
 
 	@Override
-	public void Delete(String whereClause, String[] whereArgs) {
+	public void Delete(String table, String whereClause, String[] whereArgs) {
 
 	}
 
 	@Override
-	public Cursor Query(String[] columns, String selection,
+	public Cursor Query(String table, String[] columns, String selection,
                         String[] selectionArgs, String groupBy, String having,
                         String orderBy) {
 		return null;

@@ -3,16 +3,14 @@ package com.shen.accountbook.db.table;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.provider.Settings;
-import android.widget.Toast;
+
+import com.shen.accountbook.db.constant.Constant;
 
 /**
  * User表业务操作
  *
  * */
 public class UserEx extends BaseEx {
-
-	private final static String TABLENAME = "user";
 
 	public UserEx(Context context) {
         super(context);
@@ -35,23 +33,25 @@ public class UserEx extends BaseEx {
     //    dataBase.insert("person", "phone", values);
     //    返回值是  -1  失败
 	@Override
-	public void Add(ContentValues values) {
+	public long Add(String table, ContentValues values) {
+        long i = 0;
 		try {
 			openDBConnect();
-			getDb().insert(TABLENAME, null, values);
+			i = getDb().insert(table, null, values);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			closeDBConnect();
 		}
+        return i;
 	}
 
 	@Override
-	public void Update(ContentValues values, String whereClause,
+	public void Update(String table, ContentValues values, String whereClause,
                        String[] whereArgs) {
 		try {
 			openDBConnect();
-			getDb().update(TABLENAME, values, whereClause, whereArgs);
+			getDb().update(table, values, whereClause, whereArgs);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -60,10 +60,10 @@ public class UserEx extends BaseEx {
 	}
 
 	@Override
-	public void Delete(String whereClause, String[] whereArgs) {
+	public void Delete(String table, String whereClause, String[] whereArgs) {
 		try {
 			openDBConnect();
-			getDb().delete(TABLENAME, whereClause, whereArgs);
+			getDb().delete(table, whereClause, whereArgs);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -73,13 +73,13 @@ public class UserEx extends BaseEx {
 
 	// 该方法可以修改返回值参数为List<T>或其他自定义返回值，注意关闭数据库连接。
 	@Override
-	public Cursor Query(String[] columns, String selection,
+	public Cursor Query(String table, String[] columns, String selection,
                         String[] selectionArgs, String groupBy, String having,
                         String orderBy) {
 		Cursor cursor = null;
 		try {
 			openDBConnect();
-			cursor = getDb().query(TABLENAME,columns,selection,selectionArgs,groupBy, having, orderBy);
+			cursor = getDb().query(table,columns,selection,selectionArgs,groupBy, having, orderBy);
 			
 		} catch (Exception e) {
 			e.printStackTrace();

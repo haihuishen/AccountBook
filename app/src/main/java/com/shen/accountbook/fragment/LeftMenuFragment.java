@@ -1,6 +1,7 @@
 package com.shen.accountbook.fragment;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -18,6 +19,7 @@ import com.shen.accountbook.LoginActivity;
 import com.shen.accountbook.R;
 import com.shen.accountbook.RegisterActivity;
 import com.shen.accountbook.Utils.SharePrefUtil;
+import com.shen.accountbook.db.constant.Constant;
 import com.shen.accountbook.db.table.UserEx;
 
 /**
@@ -76,16 +78,18 @@ public class LeftMenuFragment extends Fragment {
 
 
         bt_login.setOnClickListener(new View.OnClickListener() {
+
+
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getContext(), LoginActivity.class);
+                Intent intent = new Intent(getActivity().getApplicationContext(), LoginActivity.class);
                 startActivityForResult(intent,REQUEST);
             }
         });
         bt_register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getContext(), RegisterActivity.class);
+                Intent intent = new Intent(getActivity().getApplicationContext(), RegisterActivity.class);
                 startActivity(intent);
             }
         });
@@ -122,7 +126,7 @@ public class LeftMenuFragment extends Fragment {
             mSp_password = SharePrefUtil.getString(getActivity(), SharePrefUtil.KEY.PASSWORK, "");
             System.out.println( "shen:"+mSp_user + ":" + mSp_password );
             UserEx userEx = new UserEx(getActivity().getApplication());
-            Cursor cursor = userEx.Query(new String[]{"name,password,sex"}, "name=? and password=?",
+            Cursor cursor = userEx.Query(Constant.TABLE_USER,new String[]{"name,password,sex"}, "name=? and password=?",
                     new String[]{mSp_user,mSp_password},null,null,null);
 
             if(cursor.getCount() >= 1) {
@@ -169,7 +173,7 @@ public class LeftMenuFragment extends Fragment {
 
                 if(!TextUtils.isEmpty(mLogin_User)){
                     UserEx userEx = new UserEx(getActivity().getApplication());
-                    Cursor cursor = userEx.Query(new String[]{"name,password,sex"}, "name=?",
+                    Cursor cursor = userEx.Query(Constant.TABLE_USER,new String[]{"name,password,sex"}, "name=?",
                             new String[]{mLogin_User},null,null,null);
 
                 if(cursor.getCount() >= 1) {

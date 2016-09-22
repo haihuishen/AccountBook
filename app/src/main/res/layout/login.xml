@@ -31,7 +31,7 @@
             android:textColorHighlight="#7e4d84"
             android:ellipsize="end"
             android:gravity="center_vertical"
-            android:background="@drawable/txtborder"
+            android:background="@drawable/txtborder_white"
             android:paddingRight="2dp"
             android:paddingLeft="2dp"/>
         <EditText
@@ -45,7 +45,7 @@
             android:singleLine="true"
             android:ellipsize="end"
             android:gravity="center_vertical"
-            android:background="@drawable/txtborder"
+            android:background="@drawable/txtborder_white"
             android:paddingRight="2dp"
             android:paddingLeft="2dp"/>
 

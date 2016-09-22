@@ -2,19 +2,21 @@ package com.shen.accountbook;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.MotionEvent;
-import android.widget.Toast;
 
-import com.shen.accountbook.Utils.SharePrefUtil;
 import com.shen.accountbook.db.Helper.DatabaseHelper;
-import com.shen.accountbook.db.constant.Constant;
+import com.shen.accountbook.db.model.MainTypeModel;
+import com.shen.accountbook.db.model.TypeModelManage;
 import com.shen.accountbook.db.table.UserEx;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 
 /**
  * 闪屏<p>
@@ -26,8 +28,10 @@ import java.io.File;
  * 2、初始化数据 (拷贝数据到SD)<br>
  * 3、提高用户体验 <br>
  * 4、连接服务器是否有新的版本等。<br>
+ *
+ *     //implements UncaughtExceptionHandler
  */
-public class SplashActivity extends Activity {
+public class SplashActivity extends Activity implements Thread.UncaughtExceptionHandler {
 
     private Handler handler = new Handler();
     private Runnable runnable;
@@ -55,39 +59,80 @@ public class SplashActivity extends Activity {
             }
         }, 3000);
 
+        //在此调用下面方法，才能捕获到线程中的异常
+        Thread.setDefaultUncaughtExceptionHandler(this);
+
+        initAddressDB("Type.db");
         initData();
-
-
-
-
-        if(SharePrefUtil.getBoolean(getBaseContext(), SharePrefUtil.KEY.AUTO_ISCHECK, false) ){
-            String usename = SharePrefUtil.getString(getBaseContext(), SharePrefUtil.KEY.USENAME, "");
-            String password = SharePrefUtil.getString(getBaseContext(), SharePrefUtil.KEY.PASSWORK, "");
-
-            Cursor cursor = userEx.Query(new String[]{"neme, password"}, "name=?,password=?", new String[]{usename,password}, null, null, null);
-            if(cursor.getCount() == 1){
-                SharePrefUtil.saveBoolean(getBaseContext(), SharePrefUtil.KEY.LOGINING, true);
-            }
-            else{
-                SharePrefUtil.saveBoolean(getBaseContext(), SharePrefUtil.KEY.LOGINING, false);
-                Toast.makeText(this, "用户或密码错误，不能自动登录",Toast.LENGTH_SHORT);
-            }
-        }
     }
 
     private void initData() {
+        TypeModelManage manage = new TypeModelManage(getApplicationContext());
+        List<MainTypeModel> mainTypeList = manage.getMainTypeList();
+        Log.i("shen", "mainTypeList.size()  " + mainTypeList.size());
+        for(int i=0; i< mainTypeList.size(); i++){
+//            mainTypeList.get(i).getName();
+//            String[] type1 = mainTypeList.get(i).getType1().getName();
+            Log.i("shen",mainTypeList.get(i).toString());
 
-        // APP当前的版本
-        try {
-            this.dbVersion = SplashActivity.this.getPackageManager()
-                    .getPackageInfo(SplashActivity.this.getPackageName(), 0).versionCode;
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
         }
-        Toast.makeText(this, "Version:"+dbVersion,Toast.LENGTH_SHORT).show();
-        userEx = new UserEx(this);
-        File f = getCacheDir();
-        System.out.println("CacheDir:"+f.getPath());
+
+    }
+
+
+    /**
+     * 拷贝数据库（xx.db）到files文件夹下
+     * <br>注1：只在第一次打开应用才拷贝,第二次会判断有没有这个数据库
+     * <br>注2：xx.db拷贝到工程目录assets目录下
+     * <br>拿到files文件夹：File files = getFilesDir();
+     * <br>如：复制后的data/data/com.shen.accountbook/files/xx.db"
+     * @param dbName	数据库名称
+     */
+    private void initAddressDB(String dbName) {
+        //1,在files文件夹下创建同名dbName数据库文件过程
+        File files = getFilesDir();
+        // 在files文件夹下生成一个"dbName名字"的文件
+        File file = new File(files, dbName);
+
+        // 如果"dbName名字的文件" 存在  （如第二次进入）
+        if(file.exists()){
+            return;
+        }
+
+        InputStream stream = null;
+        FileOutputStream fos = null;
+
+        //2,输入流读取assets目录下的文件
+        try {
+            // getAssets()拿到"资产目录"的文件夹（工程目录下的assets目录）
+            // ***打开"dbName名字的文件"    （拿到他的输入流）
+            stream = getAssets().open(dbName);
+
+            //3,将读取的内容写入到指定文件夹的文件中去
+            // ***拿到"file文件"的"输出流"
+            fos = new FileOutputStream(file);
+
+            //4,每次的读取内容大小
+            byte[] bs = new byte[1024];
+            int temp = -1;
+            while( (temp = stream.read(bs))!=-1){	// 將"输入流"（stream）读到"bs"
+                fos.write(bs, 0, temp);				// 將"bs"写到"fos"（输出流）
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally{
+            if(stream!=null && fos!=null){	// "流"非等于"null",说明没有关闭
+                try {
+                    // 关闭流
+                    stream.close();
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
     }
 
     @Override
@@ -104,5 +149,11 @@ public class SplashActivity extends Activity {
 //        }
 
         return super.onTouchEvent(event);
+    }
+
+    @Override
+    public void uncaughtException(Thread thread, Throwable ex) {
+        //在此处理异常， arg1即为捕获到的异常
+        Log.i("AAA", "uncaughtException   " + ex);
     }
 }

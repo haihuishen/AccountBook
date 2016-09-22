@@ -2,6 +2,7 @@ package com.shen.accountbook;
 
 import android.app.Activity;
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -15,6 +16,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.shen.accountbook.db.constant.Constant;
 import com.shen.accountbook.db.table.UserEx;
 
 /**
@@ -99,17 +101,28 @@ public class RegisterActivity extends Activity{
                     Toast.makeText(getBaseContext(), "用户和密码不能为空", Toast.LENGTH_SHORT).show();
                 } else {
                     UserEx userEx = new UserEx(getApplication());
-                    try {
-                        ContentValues values = new ContentValues();
-                        values.put("name", mUsename.getText().toString());                        // 字段  ： 值
-                        values.put("password", mPassword.getText().toString());
-                        values.put("sex", Sex);
-                        userEx.Add(values);
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    Cursor cursor = userEx.Query(Constant.TABLE_USER, new String[]{"name"}, "name=?",
+                                new String[]{mUsename.getText().toString()},null,null,null);
+                    String c_name = "";
+                    if(cursor.getCount() >= 1) {
+                        cursor.moveToNext();
+                        c_name = cursor.getString(0);
                     }
-                    finish();
+
+                    if(!(c_name.equals(mUsename.getText().toString()))){
+                        try {
+                            ContentValues values = new ContentValues();
+                            values.put("name", mUsename.getText().toString());                        // 字段  ： 值
+                            values.put("password", mPassword.getText().toString());
+                            values.put("sex", Sex);
+                            userEx.Add(Constant.TABLE_USER, values);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        finish();
+                    }else{
+                        Toast.makeText(getBaseContext(), "此用户已存在!", Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         });

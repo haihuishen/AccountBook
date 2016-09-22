@@ -6,7 +6,7 @@
 
     <include layout="@layout/title_bar" />
 
-    <android.support.v4.view.ViewPager
+    <com.shen.accountbook.view.NoScrollViewPager
         android:id="@+id/vp_content"
         android:layout_width="match_parent"
         android:layout_height="0dp"

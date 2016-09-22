@@ -47,7 +47,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 		System.out.println("DBHelper onCreate");
-        db.execSQL("create table if not exists user(id INTEGER PRIMARY KEY AUTOINCREMENT, name varchar(10), password varchar(50),sex int)");
+        db.execSQL("create table if not exists user(_id integer primary key autoincrement,name varchar(10),password varchar(50),sex tinyint(1))");
+        db.execSQL("create table if not exists consumption(_id integer primary key autoincrement," +
+                "maintype varchar(20) not null,type1 varchar(20),concreteness varchar(30)," +
+                "price decimal(18,2),number integer,unitprice decimal(18,2),image varchar(50),date date not null)");
     }
     /**
      * 数据库更新的时候调用该方法

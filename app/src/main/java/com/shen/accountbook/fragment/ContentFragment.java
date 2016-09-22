@@ -16,7 +16,13 @@ import android.widget.TextView;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import com.shen.accountbook.MainActivity;
 import com.shen.accountbook.R;
+import com.shen.accountbook.fragment.pages.AddPager;
+import com.shen.accountbook.fragment.pages.BasePager;
+import com.shen.accountbook.fragment.pages.MainPager;
+import com.shen.accountbook.fragment.pages.OtherPager;
 import com.shen.accountbook.view.NoScrollViewPager;
+
+import java.util.ArrayList;
 
 /**
  * Created by shen on 8/25 0025.
@@ -29,15 +35,22 @@ public class ContentFragment extends Fragment {
      */
     public Activity mActivity;
 
-    public ViewPager mViewPager;
+    public NoScrollViewPager mViewPager;
 
-    private int[] mpages;
 
     /** 下面的"底栏标签"(RadioButton)的 组
      * <p>private RadioGroup rgGroup;
      */
     private RadioGroup rgGroup;
 
+    /**
+     * 三个标签页的集合
+     * <p>private ArrayList<BasePager> mPagers;
+     */
+    private ArrayList<BasePager> mPagers;
+
+    TextView tv_title;
+    ImageButton btnMenu;
     /**
      *  Fragment创建
      */
@@ -60,6 +73,7 @@ public class ContentFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         View view = initView();
+        initData();
         return view;
     }
 
@@ -69,45 +83,64 @@ public class ContentFragment extends Fragment {
         // ***注意上下文对象：获取当前fragment所依赖的activity
        View view = View.inflate(mActivity, R.layout.fragment_content, null);
 
-        TextView tv_title = (TextView)view.findViewById(R.id.tv_title);
-        mViewPager = (ViewPager) view.findViewById(R.id.vp_content);
+        tv_title = (TextView)view.findViewById(R.id.tv_title);
+        mViewPager = (NoScrollViewPager) view.findViewById(R.id.vp_content);
+        rgGroup = (RadioGroup) view.findViewById(R.id.rg_group);
+        btnMenu = (ImageButton) view.findViewById(R.id.btn_menu);
 
-        tv_title.setText("首页");
-        mpages= new int[]{R.drawable.viewpage_shouye, R.drawable.viewpage_tianjia, R.drawable.viewpage_qita};
+        return view;
+    }
+
+    private void initData(){
+
+        mPagers = new ArrayList<BasePager>();
+        // 添加五个标签页
+        mPagers.add(new MainPager(mActivity));
+        mPagers.add(new AddPager(mActivity));
+        mPagers.add(new OtherPager(mActivity));
+        // 给ViewPage添加 适配器
         mViewPager.setAdapter(new ContentAdapter());
 
-        rgGroup = (RadioGroup) view.findViewById(R.id.rg_group);
-
-        rgGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                System.out.println("shen");
-                    switch (checkedId){
-                        case R.id.rb_home:
-                            mViewPager.setCurrentItem(0);
-                            break ;
-                        case R.id.rb_add:
-                            mViewPager.setCurrentItem(1);
-                            break ;
-                        case R.id.rb_other:
-                            mViewPager.setCurrentItem(2);
-                            break ;
-                    }
-
-            }
-        });
-
-        ImageButton btnMenu = (ImageButton) view.findViewById(R.id.btn_menu);
         // 标题的导航键（菜单按钮） 设置 点击监听
         btnMenu.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
                 //打开或者关闭侧边栏
                 toggle();
             }
         });
-        return view;
+
+        // "底栏标签" 切换监听
+        rgGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                switch (checkedId) {
+                    case R.id.rb_home:						// 首页
+
+                        // mViewPager.setCurrentItem(0);
+                        // 参2:表示是否具有滑动动画
+                        mViewPager.setCurrentItem(0, false);
+                        tv_title.setText("首页");
+                        break;
+                    case R.id.rb_add:						// 添加
+
+                        mViewPager.setCurrentItem(1, false);
+                        tv_title.setText("添加");
+                        break;
+                    case R.id.rb_other:						// 其他
+
+                        mViewPager.setCurrentItem(2, false);
+                        tv_title.setText("其他");
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+        });
+
+        rgGroup.check(R.id.rb_home);   // 默认选中"首页"
     }
 
     /**
@@ -128,13 +161,10 @@ public class ContentFragment extends Fragment {
      */
     class ContentAdapter extends PagerAdapter {
 
-        /**
-         *  item(项)的个数
-         */
+        /**  item(项)的个数*/
         @Override
         public int getCount() {
-
-            return mpages.length;
+            return mPagers.size();
         }
 
         /**
@@ -143,23 +173,21 @@ public class ContentFragment extends Fragment {
          */
         @Override
         public boolean isViewFromObject(View view, Object object) {
-
             return view == object;
         }
 
-        /**
-         *  初始化item(项)布局
-         */
+        /** 初始化item(项)布局*/
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
 
-            if(position == 0)
-                mViewPager.getParent().requestDisallowInterceptTouchEvent(true);
-            else
-                mViewPager.getParent().requestDisallowInterceptTouchEvent(false);
+            // 將 哪一个布局,弄成标签
+            BasePager pager = mPagers.get(position);
+            // 获取当前页面对象的布局
+            View view = pager.mRootView;
 
-            ImageView view = new ImageView(mActivity);
-            view.setImageResource(mpages[position]);
+            // 初始化数据, viewpager会默认加载下一个页面,
+            // 为了节省流量和性能,不要在此处调用初始化数据的方法
+            // pager.initData();
             container.addView(view);
 
             return view;

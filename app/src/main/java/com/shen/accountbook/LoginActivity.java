@@ -1,6 +1,7 @@
 package com.shen.accountbook;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -17,12 +18,15 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.shen.accountbook.Utils.SharePrefUtil;
+import com.shen.accountbook.db.constant.Constant;
 import com.shen.accountbook.db.table.UserEx;
 
 /**
  * Created by shen on 9/1 0001.
  */
 public class LoginActivity extends Activity {
+
+    public static final int OK = 1;
 
     private ImageButton mMeun;
     private ImageButton mBack;
@@ -116,7 +120,7 @@ public class LoginActivity extends Activity {
                 } else {
                     UserEx userEx = new UserEx(getApplication());
 
-                    Cursor cursor = userEx.Query(new String[]{"name,password,sex"}, "name=? and password=?",
+                    Cursor cursor = userEx.Query(Constant.TABLE_USER,new String[]{"name,password,sex"}, "name=? and password=?",
                             new String[]{mUsename.getText().toString(),mPassword.getText().toString()},null,null,null);
 
                     if(cursor.getCount() >= 1) {
@@ -141,6 +145,13 @@ public class LoginActivity extends Activity {
                             SharePrefUtil.saveBoolean(getBaseContext(), SharePrefUtil.KEY.AUTO_ISCHECK, mAotu.isChecked());
                         else
                             SharePrefUtil.saveBoolean(getBaseContext(), SharePrefUtil.KEY.AUTO_ISCHECK, mAotu.isChecked());
+
+                        Intent intent = new Intent();
+                        Bundle bundle = new Bundle();
+
+                        bundle.putString("name",c_name);
+                        intent.putExtras(bundle);
+                        setResult(OK,intent);
 
                         finish();
                     }

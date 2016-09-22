@@ -14,7 +14,7 @@ public interface BaseInterface {
 	 * 
 	 * @param values 新增内容 key-value
 	 * */
-	abstract void Add(ContentValues values);
+	abstract long Add(String table, ContentValues values);
 
 	/**
 	 * 更新
@@ -24,7 +24,7 @@ public interface BaseInterface {
 	 * @param whereArgs     条件集合 例如：new String[]{"1"}
 	 * 
 	 * */
-	abstract void Update(ContentValues values, String whereClause,
+	abstract void Update(String table, ContentValues values, String whereClause,
                          String[] whereArgs);
 
 	/**
@@ -34,7 +34,7 @@ public interface BaseInterface {
 	 * @param whereArgs     删除集合 例如：new String[]{"1"}
 	 * 
 	 * */
-	abstract void Delete(String whereClause, String[] whereArgs);
+	abstract void Delete(String table, String whereClause, String[] whereArgs);
 
 	/**
 	 * 查询<p>
@@ -52,8 +52,9 @@ public interface BaseInterface {
 	 * @param orderBy           排序
 	 * 
 	 * */
-	abstract Cursor Query(String[] columns, String selection,
+	abstract Cursor Query(String table, String[] columns, String selection,
                           String[] selectionArgs, String groupBy, String having,
                           String orderBy);
+
 
 }
