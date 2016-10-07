@@ -29,6 +29,10 @@
         <activity android:name=".RegisterActivity"></activity>
         <activity android:name=".ReportForDayActivity"></activity>
 
+        <activity android:name=".LineChartActivity" android:label="line_chart" ></activity>
+        <activity android:name=".ReportForM_LineChar_Activity" android:label="l_c" ></activity>
+        <activity android:name=".ReportForY_LineChar_Activity" android:label="l_c" ></activity>
+        <activity android:name=".ReportForType_LineChar_Activity" android:label="l_c" ></activity>
 
         <!-- ATTENTION: This was auto-generated to add Google Play services to your project for
      App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information. -->

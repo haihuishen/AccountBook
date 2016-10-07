@@ -25,7 +25,7 @@ public class SpecialCalendar {
 		return false;
 	}
 
-    /** 得到某月有多少天数*/
+    /** 得到某月有多少天数(二月判断闰年)*/
 	public int getDaysOfMonth(boolean isLeapyear, int month) {
 		switch (month) {
 		case 1:
