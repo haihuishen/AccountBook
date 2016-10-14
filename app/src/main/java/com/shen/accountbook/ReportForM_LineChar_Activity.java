@@ -28,6 +28,7 @@ import com.shen.accountbook.Utils.SharePrefUtil;
 import com.shen.accountbook.clander.SpecialCalendar;
 import com.shen.accountbook.db.constant.Constant;
 import com.shen.accountbook.db.table.TableEx;
+import com.shen.accountbook.global.AccountBookApplication;
 import com.shen.accountbook.widget.WheelView;
 import com.shen.accountbook.widget.adapters.ArrayWheelAdapter;
 
@@ -465,7 +466,7 @@ public class ReportForM_LineChar_Activity extends FragmentActivity implements Vi
             numberOfPoints[0] = daysOfMonth;
 
             for (int i = 0; i < daysOfMonth; i++) {
-                Cursor cursor = tableEx.Query(Constant.TABLE_CONSUMPTION, new String[]{"sum(price)"}, "date=?", new String[]{year + "-" + months + "-" + i}, null, null, null);
+                Cursor cursor = tableEx.Query(Constant.TABLE_CONSUMPTION, new String[]{"sum(price)"}, "date=? and user=?", new String[]{year + "-" + months + "-" + i, AccountBookApplication.getUserInfo().getUserName()}, null, null, null);
 
                 if (cursor.getCount() == 0)
                     NumbersTab[0][i] = 0;
@@ -489,7 +490,7 @@ public class ReportForM_LineChar_Activity extends FragmentActivity implements Vi
 
                 numberOfPoints[i] = daysOfMonth;
                 for (int j = 0; j < daysOfMonth; j++) {
-                    Cursor cursor = tableEx.Query(Constant.TABLE_CONSUMPTION, new String[]{"sum(price)"}, "date=?", new String[]{year + "-" + ms[i] + "-" + j}, null, null, null);
+                    Cursor cursor = tableEx.Query(Constant.TABLE_CONSUMPTION, new String[]{"sum(price)"}, "date=? and user=?", new String[]{year + "-" + ms[i] + "-" + j, AccountBookApplication.getUserInfo().getUserName()}, null, null, null);
 
                     if (cursor.getCount() == 0) {
                         NumbersTab[i][j] = 0;
@@ -754,7 +755,7 @@ public class ReportForM_LineChar_Activity extends FragmentActivity implements Vi
             numberOfPoints[0] = daysOfMonth;
 
             for (int i = 0; i < daysOfMonth; i++) {
-                Cursor cursor = tableEx.Query(Constant.TABLE_CONSUMPTION, new String[]{"sum(price)"}, "date=?", new String[]{c_year + "-" + c_month + "-" + i}, null, null, null);
+                Cursor cursor = tableEx.Query(Constant.TABLE_CONSUMPTION, new String[]{"sum(price)"}, "date=? and user=?", new String[]{c_year + "-" + c_month + "-" + i, AccountBookApplication.getUserInfo().getUserName()}, null, null, null);
 
                 if (cursor.getCount() == 0)
                     randomNumbersTab[0][i] = 0;

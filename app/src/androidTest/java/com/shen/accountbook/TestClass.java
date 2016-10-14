@@ -3,8 +3,11 @@ package com.shen.accountbook;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.test.InstrumentationTestCase;
 
+import com.shen.accountbook.Utils.ImageFactory;
 import com.shen.accountbook.Utils.toFormatUtil;
 import com.shen.accountbook.db.Helper.DatabaseHelper;
 import com.shen.accountbook.db.constant.Constant;
@@ -33,11 +36,11 @@ public class TestClass extends InstrumentationTestCase{
 //                "maintype varchar(20) not null,type1 varchar(20),concreteness varchar(30)," +
 //                "price REAL not null,image varchar(50),date date not null)");
 
- //        consumptionEx.getDb().execSQL("insert into consumption values(null,'就餐', '午餐', '自定义', 12.51, null, date('2004-08-13 00:00:00'))");
+        //        consumptionEx.getDb().execSQL("insert into consumption values(null,'就餐', '午餐', '自定义', 12.51, null, date('2004-08-13 00:00:00'))");
         String path = "data/data/com.shen.accountbook/databases/AccountBook.db";
         SQLiteDatabase db = SQLiteDatabase.openDatabase(path,null,SQLiteDatabase.OPEN_READWRITE|SQLiteDatabase.CREATE_IF_NECESSARY );//读写","若不存在则创建
 //        db.execSQL("insert into consumption values(null,'就餐1', '午餐', '自定义', 12.51, null, date('2004-08-13 00:00:00'))");
-      String image = null;
+        String image = null;
         String id = null;
         ContentValues values = new ContentValues();
 //        values.put("id", id);// 空不要写成 ""  ，不要写成 "null" 要写成String id = null;  主键可以不写
@@ -99,10 +102,10 @@ public class TestClass extends InstrumentationTestCase{
         int day = 1;
 
 
-
         String path = "data/data/com.shen.accountbook/databases/AccountBook.db";
         SQLiteDatabase db = SQLiteDatabase.openDatabase(path,null,SQLiteDatabase.OPEN_READWRITE|SQLiteDatabase.CREATE_IF_NECESSARY );//读写、若不存在则创建
-
+//        db.execSQL("delete table consumption");
+        db.delete(Constant.TABLE_CONSUMPTION,null,null);
 
         String[] mt ={"就餐","交通","零食","蒲","教育","生活用品","各种月费",
                 "家电","电子产品","交通工具","游戏","其他"};
@@ -122,85 +125,143 @@ public class TestClass extends InstrumentationTestCase{
 
         Random ra =new Random();
 
+        ContentValues userValues = new ContentValues();
+        //   userValues.put("id", id);                   // 主键可以不写
+        userValues.put("name", "test");                        // 字段  ： 值
+        userValues.put("password", "123");
+        userValues.put("sex", 1);
+        db.insert(Constant.TABLE_USER, "", userValues);
 
+        for(int y = 2015; y<2018; y++) {
+            for (int i = 0; i < 3000; i++) {
+                String type1 = null;
+                String maintype = null;
+                float price = 0;
+                int number = 0;
+                float unitPrice = 0;
 
-        for(int i = 0; i<3000; i++) {
-            String type1 = null;
-            String maintype = null;
-            float price = 0;
-            int number = 0;
-            float unitPrice = 0;
+                mt_Random = ra.nextInt(MAINTTPE);
+                maintype = mt[mt_Random];
 
-            mt_Random = ra.nextInt(MAINTTPE);
-            maintype = mt[mt_Random];
+                switch (mt_Random) {
+                    case 0:
+                        TYPE1 = 7;
+                        t1_Random = ra.nextInt(TYPE1);
+                        type1 = ty0[t1_Random];
+                        break;
+                    case 1:
+                        TYPE1 = 9;
+                        t1_Random = ra.nextInt(TYPE1);
+                        type1 = ty1[t1_Random];
+                        break;
+                    case 2:
+                        TYPE1 = 3;
+                        t1_Random = ra.nextInt(TYPE1);
+                        type1 = ty2[t1_Random];
+                        break;
+                    case 3:
+                        TYPE1 = 3;
+                        t1_Random = ra.nextInt(TYPE1);
+                        type1 = ty3[t1_Random];
+                        break;
+                    case 4:
+                        TYPE1 = 5;
+                        t1_Random = ra.nextInt(TYPE1);
+                        type1 = ty4[t1_Random];
+                        break;
+                    case 5:
+                        TYPE1 = 6;
+                        t1_Random = ra.nextInt(TYPE1);
+                        type1 = ty5[t1_Random];
+                        break;
+                    case 6:
+                        TYPE1 = 6;
+                        t1_Random = ra.nextInt(TYPE1);
+                        type1 = ty6[t1_Random];
+                        break;
+                    case 7:
+                        TYPE1 = 4;
+                        t1_Random = ra.nextInt(TYPE1);
+                        type1 = ty7[t1_Random];
+                        break;
+                    case 8:
+                        TYPE1 = 3;
+                        t1_Random = ra.nextInt(TYPE1);
+                        type1 = ty8[t1_Random];
+                        break;
+                    case 9:
+                        TYPE1 = 3;
+                        t1_Random = ra.nextInt(TYPE1);
+                        type1 = ty9[t1_Random];
+                        break;
+                    case 10:
+                        TYPE1 = 1;
+                        t1_Random = ra.nextInt(TYPE1);
+                        type1 = ty10[t1_Random];
+                        break;
+                    case 11:
+                        TYPE1 = 1;
+                        t1_Random = ra.nextInt(TYPE1);
+                        type1 = ty11[t1_Random];
+                        break;
+                }
 
-            switch (mt_Random){
-                case 0: TYPE1 = 7;t1_Random = ra.nextInt(TYPE1);type1 = ty0[t1_Random]; break;
-                case 1: TYPE1 = 9;t1_Random = ra.nextInt(TYPE1);type1 = ty1[t1_Random]; break;
-                case 2: TYPE1 = 3;t1_Random = ra.nextInt(TYPE1);type1 = ty2[t1_Random]; break;
-                case 3: TYPE1 = 3;t1_Random = ra.nextInt(TYPE1);type1 = ty3[t1_Random]; break;
-                case 4: TYPE1 = 5;t1_Random = ra.nextInt(TYPE1);type1 = ty4[t1_Random]; break;
-                case 5: TYPE1 = 6;t1_Random = ra.nextInt(TYPE1);type1 = ty5[t1_Random]; break;
-                case 6: TYPE1 = 6;t1_Random = ra.nextInt(TYPE1);type1 = ty6[t1_Random]; break;
-                case 7: TYPE1 = 4;t1_Random = ra.nextInt(TYPE1);type1 = ty7[t1_Random]; break;
-                case 8: TYPE1 = 3;t1_Random = ra.nextInt(TYPE1);type1 = ty8[t1_Random]; break;
-                case 9: TYPE1 = 3;t1_Random = ra.nextInt(TYPE1);type1 = ty9[t1_Random]; break;
-                case 10: TYPE1 = 1;t1_Random = ra.nextInt(TYPE1);type1 = ty10[t1_Random]; break;
-                case 11: TYPE1 = 1;t1_Random = ra.nextInt(TYPE1);type1 = ty11[t1_Random]; break;
-            }
+                number = ra.nextInt(10) + 1;
+                unitPrice = ra.nextFloat() * (100 - 1) + 1;
+//                price = ra.nextFloat() * (1000 - 100) + 1;
+                price = number * unitPrice;
 
-            number = ra.nextInt(10)+1;
-            price = ra.nextFloat() * (1000 - 100) + 1;
-            unitPrice = ra.nextFloat() * (100 - 1) + 1;
-
-            String id = null;   // 空不要写成 ""  ，不要写成 "null" 要写成String id = null;  主键可以不写
-       //     String maintype = null;
-      //      String type1 = null;
+                String id = null;   // 空不要写成 ""  ，不要写成 "null" 要写成String id = null;  主键可以不写
+                //     String maintype = null;
+                //      String type1 = null;
 //            String concreteness = null;
-            String concreteness = "自定义";
+                String concreteness = "自定义";
 //            float price = 0;
 //            int number = 0;
 //            float unitPrice = 0;
-            String image = null;    // 空不要写成 ""  ，不要写成 "null" 要写成String image = null;
-            String date = null;
+                String image = null;    // 空不要写成 ""  ，不要写成 "null" 要写成String image = null;
+                String date = null;
 
-            if(0<M && M<12) {
-                if(0<day && day<=28){
-                    date = "2016-"+M+"-"+day;
-                    day++;
-                }else{
-                    M++;
-                    day = 1;
-                    date = "2016-"+M+"-"+day;
-                    day++;
+                image = "test.png";
+
+                if (0 < M && M < 12) {
+                    if (0 < day && day <= 28) {
+                        date = y + "-" + M + "-" + day;
+                        day++;
+                    } else {
+                        M++;
+                        day = 1;
+                        date = y + "-" + M + "-" + day;
+                        day++;
+                    }
+                } else {
+                    M = 1;
+                    if (0 < day && day <= 28) {
+                        date = y + "-" + M + "-" + day;
+                        day++;
+                    } else {
+                        M++;
+                        day = 1;
+                        date = y + "-" + M + "-" + day;
+                        day++;
+                    }
                 }
+
+                ContentValues values = new ContentValues();
+                //   values.put("id", id);                   // 主键可以不写
+                values.put("user", "test");                        // 字段  ： 值
+                values.put("maintype", maintype);                        // 字段  ： 值
+                values.put("type1", type1);
+                values.put("concreteness", concreteness);
+                values.put("price", toFormatUtil.toDecimalFormat(price, 2));
+                values.put("number", number);
+                values.put("unitPrice", toFormatUtil.toDecimalFormat(unitPrice, 2));
+                values.put("image", image);
+                values.put("date", date);   // 这里只要填写 YYYY-M-DD  ，不用填date(2016-9-12 00:00:00) 这么麻烦
+
+                db.insert(Constant.TABLE_CONSUMPTION, "", values);
+
             }
-            else{
-                M = 1;
-                if(0<day && day<=28){
-                    date = "2016-"+M+"-"+day;
-                    day++;
-                }else{
-                    M++;
-                    day = 1;
-                    date = "2016-"+M+"-"+day;
-                    day++;
-                }
-            }
-
-            ContentValues values = new ContentValues();
-            //   values.put("id", id);                   // 主键可以不写
-            values.put("maintype", maintype);                        // 字段  ： 值
-            values.put("type1", type1);
-            values.put("concreteness", concreteness);
-            values.put("price", toFormatUtil.toDecimalFormat(price, 2));
-            values.put("number", number);
-            values.put("unitPrice", toFormatUtil.toDecimalFormat(unitPrice, 2));
-            values.put("image", image);
-            values.put("date", date);   // 这里只要填写 YYYY-MM-DD  ，不用填date(2016-09-12 00:00:00) 这么麻烦
-
-            db.insert(Constant.TABLE_CONSUMPTION,"",values);
-
         }
     }
 }

@@ -1,3 +1,4 @@
-include ':app', ':SlidingMenu', ':HelloCharts'
+include ':app', ':SlidingMenu', ':HelloCharts', ':PhotoView'
 project(':SlidingMenu').projectDir = new File('libraries/SlidingMenu')
 project(':HelloCharts').projectDir = new File('libraries/HelloCharts')
+project(':PhotoView').projectDir = new File('libraries/PhotoView')

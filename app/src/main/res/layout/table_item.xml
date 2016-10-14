@@ -102,10 +102,9 @@
         android:background="#B8B8B8"
         android:visibility="visible" />
 
-    <ImageButton
-        android:id="@+id/tableItem_ImageBtn_image"
+    <com.bm.library.PhotoView
+        android:id="@+id/tableItem_pv_image"
         android:layout_width="0dp"
         android:layout_weight="1"
-        android:layout_height="match_parent"
-        android:background="#fcb901"/>
+        android:layout_height="match_parent"/>
 </LinearLayout>

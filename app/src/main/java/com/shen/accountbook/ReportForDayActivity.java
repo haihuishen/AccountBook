@@ -1,12 +1,15 @@
 package com.shen.accountbook;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.widget.CursorAdapter;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -14,28 +17,35 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bm.library.Info;
+import com.bm.library.PhotoView;
 import com.nineoldandroids.view.ViewHelper;
+import com.shen.accountbook.Utils.ImageFactory;
 import com.shen.accountbook.clander.CalendarAdapter;
 import com.shen.accountbook.clander.Constants;
 import com.shen.accountbook.clander.SpecialCalendar;
-import com.shen.accountbook.clander.adapter.MySimpleCursorAdapter;
 import com.shen.accountbook.clander.adapter.TestAdapter;
 import com.shen.accountbook.clander.view.ScrollableLayout;
 import com.shen.accountbook.db.constant.Constant;
 import com.shen.accountbook.db.table.TableEx;
+import com.shen.accountbook.global.AccountBookApplication;
 import com.shen.accountbook.widget.WheelView;
 import com.shen.accountbook.widget.adapters.ArrayWheelAdapter;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -55,7 +65,10 @@ public class ReportForDayActivity extends FragmentActivity implements View.OnCli
 
     private ArrayList<String> mData = new ArrayList<String>();
     private TestAdapter mAdapter;                       // listview测试使用的适配器
-    private MySimpleCursorAdapter adapter;                        // 表格使用的!
+    private MySimpleCursorAdapter simpleadapter;                        // 表格使用的!
+    private MyCursorAdapter adapter;                        // 表格使用的!
+
+
     /** 这里是使用 一个LinearLayout 包裹一个TextView(放一张图片)当作按键*/
     private LinearLayout mBtnLeft,mBtnRight;
     /** 被ScrollableLayout包裹的--用来包裹GridView*/
@@ -84,6 +97,15 @@ public class ReportForDayActivity extends FragmentActivity implements View.OnCli
     private float currentLoction = 1f; // 记录当天的收缩比例值
     /**记录选择那一天的收缩比例值*/
     private float selectLoction = 1f;   // 记录选择那一天的收缩比例值
+
+
+    static View mParent;
+    static View mBg;
+    static PhotoView mPhotoView;
+    static Info mInfo;
+
+    static AlphaAnimation in = new AlphaAnimation(0, 1);
+    static AlphaAnimation out = new AlphaAnimation(1, 0);
 
     /**
      * 本activity的构造函数(在 onCreate之前)
@@ -122,6 +144,44 @@ public class ReportForDayActivity extends FragmentActivity implements View.OnCli
         mBtnRight = (LinearLayout) findViewById(R.id.btn_next_month);
         mBtnLeft.setOnClickListener(this);
         mBtnRight.setOnClickListener(this);
+
+
+        mParent = findViewById(R.id.parent);
+        mBg = findViewById(R.id.bg);
+        mPhotoView = (PhotoView) findViewById(R.id.img);
+
+        in.setDuration(300);
+        out.setDuration(300);
+        out.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                mBg.setVisibility(View.INVISIBLE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+
+        mPhotoView.enable();
+        mPhotoView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mBg.startAnimation(out);
+                mPhotoView.animaTo(mInfo, new Runnable() {
+                    @Override
+                    public void run() {
+                        mParent.setVisibility(View.GONE);
+                    }
+                });
+            }
+        });
 
         // TODO 计算当天的位置和收缩比例
         SpecialCalendar calendar = new SpecialCalendar();
@@ -177,6 +237,9 @@ public class ReportForDayActivity extends FragmentActivity implements View.OnCli
         mScrollLayout.getHelper().setCurrentContainer(mListView); // 直接设置一个 View 进来
 
         gestureDetector = new GestureDetector(this);  // Gesture Detector手势探测器
+
+        jumpMonth = 0;      // 因为是 static,所以会记录的，但头文本设置是当前的年月，所以我这里清零
+        jumpYear = 0;
         calV = new CalendarAdapter(this, getResources(), jumpMonth, jumpYear, year_c, month_c, day_c);
         addGridView();
         gridView.setAdapter(calV);
@@ -184,7 +247,10 @@ public class ReportForDayActivity extends FragmentActivity implements View.OnCli
         topText.setOnClickListener(this);
         addTextToTopTextView(topText);
 
+        gridView.setSelection(calV.getStartPositon()+day_c);
+        Constants.zDay = day_c+"";
         addContentListView(year_c+"", month_c+"", day_c+"");
+
     }
 
     /** 添加gridview*/
@@ -259,7 +325,7 @@ public class ReportForDayActivity extends FragmentActivity implements View.OnCli
 //        }
 //
 //        mAdapter = new TestAdapter(mData,this);
-
+        System.out.println("查询："+year+"-"+month+"-"+day);
         TableEx tableEx = new TableEx(this);
 //        Cursor cr = tableEx.Query(new String[]{"mainType,type1,concreteness,unitPrice,number,price"},
 //                null, null, null, null, null);
@@ -271,26 +337,50 @@ public class ReportForDayActivity extends FragmentActivity implements View.OnCli
 //        String unitPrice = cr.getColumnName(3);// 获取第3列
 //        String number = cr.getColumnName(4);// 获取第4列
 //        String price = cr.getColumnName(5);// 获取第5列
-        Cursor cr = tableEx.Query(Constant.TABLE_CONSUMPTION, null,"date=?",new String[]{year+"-"+month+"-"+day}, null, null, null);
-        String mainType = cr.getColumnName(1);// 获取第1列
-        String type1 = cr.getColumnName(2);// 获取第2列
-        String concreteness = cr.getColumnName(3);// 获取第3列
 
-        String unitPrice = cr.getColumnName(6);// 获取第6列
-        String number = cr.getColumnName(5);// 获取第5列
-        String price = cr.getColumnName(4);// 获取第4列
+        Cursor cr = tableEx.Query(Constant.TABLE_CONSUMPTION, null,"date=? and user=?",new String[]{year+"-"+month+"-"+day, AccountBookApplication.getUserInfo().getUserName()}, null, null, null);
+//        String mainType = cr.getColumnName(1);// 获取第1列
+//        String type1 = cr.getColumnName(2);// 获取第2列
+//        String concreteness = cr.getColumnName(3);// 获取第3列
+//
+//        String unitPrice = cr.getColumnName(6);// 获取第6列
+//        String number = cr.getColumnName(5);// 获取第5列
+//        String price = cr.getColumnName(4);// 获取第4列
+//
+//        String[] ColumnNames = { mainType,type1,concreteness, unitPrice, number, price };
+//
+//
+//        simpleadapter = new MySimpleCursorAdapter(getApplicationContext(),
+//                R.layout.table_item, cr, ColumnNames,
+//                new int[] { R.id.tableItem_tv_ProductName_maintype,
+//                        R.id.tableItem_tv_ProductName_type1,
+//                        R.id.tableItem_tv_ProductName_concreteness,
+//                        R.id.tableItem_tv_UnitPrice,
+//                        R.id.tableItem_tv_Number,
+//                        R.id.tableItem_tv_Price});
 
-        String[] ColumnNames = { mainType,type1,concreteness, unitPrice, number, price };
+        while (cr.moveToNext()){
+            String mainType = cr.getString(Constant.TABLE_CONSUMPTION_maintype);
+            String type1 = cr.getString(Constant.TABLE_CONSUMPTION_type1);
+            String concreteness = cr.getString(Constant.TABLE_CONSUMPTION_concreteness);
+            String unitPrice = cr.getString(Constant.TABLE_CONSUMPTION_unitprice);
+            String number = cr.getString(Constant.TABLE_CONSUMPTION_number);
+            String price = cr.getString(Constant.TABLE_CONSUMPTION_price);
+            String imageName = cr.getString(Constant.TABLE_CONSUMPTION_image);
 
-
-        adapter = new MySimpleCursorAdapter(getApplicationContext(),
-                R.layout.table_item, cr, ColumnNames,
-                new int[] { R.id.tableItem_tv_ProductName_maintype,
-                        R.id.tableItem_tv_ProductName_type1,
-                        R.id.tableItem_tv_ProductName_concreteness,
-                        R.id.tableItem_tv_UnitPrice,
-                        R.id.tableItem_tv_Number,
-                        R.id.tableItem_tv_Price});
+            System.out.println(
+                    "_id" + cr.getString(Constant.TABLE_CONSUMPTION__id)+
+                            "maintype:" + mainType+
+                            "type1:" + type1+
+                            "concreteness:" + concreteness+
+                            "price:" + price+
+                            "number:" + number+
+                            "unitPrice:" + unitPrice+
+                            "date:" + cr.getString(Constant.TABLE_CONSUMPTION_date)+"\n"+
+                            "imageName:" + imageName
+            );
+        }
+        adapter = new MyCursorAdapter(getApplicationContext(),cr);
         mListView.setAdapter(adapter);
     }
 
@@ -312,7 +402,13 @@ public class ReportForDayActivity extends FragmentActivity implements View.OnCli
         gridView.setAdapter(calV);
         addTextToTopTextView(topText);
 
-        Log.d("upDateView()", "calV.getShowYear()== " + calV.getShowYear() + "calV.getShowMonth() == " + calV.getShowMonth() );
+        if(jumpMonth == 0 && jumpYear == 0){
+            Constants.zDay = day_c+"";
+            //Log.d("upDateView()", "calV.getShowYear()== " + calV.getShowYear() + "calV.getShowMonth() == " + calV.getShowMonth() );
+            addContentListView(calV.getShowYear(), calV.getShowMonth(), day_c+"");
+        }
+        Constants.zDay = "1";
+        //Log.d("upDateView()", "calV.getShowYear()== " + calV.getShowYear() + "calV.getShowMonth() == " + calV.getShowMonth() );
         addContentListView(calV.getShowYear(), calV.getShowMonth(), "1");
     }
 
@@ -397,6 +493,230 @@ public class ReportForDayActivity extends FragmentActivity implements View.OnCli
     }
 
 
+    public class MySimpleCursorAdapter extends SimpleCursorAdapter {
+
+        private Context mContext;
+
+
+//        AlphaAnimation in = new AlphaAnimation(0, 1);
+//        AlphaAnimation out = new AlphaAnimation(1, 0);
+
+        public MySimpleCursorAdapter(Context context, int layout, Cursor c,
+                                     String[] from, int[] to) {
+
+            super(context, layout, c, from, to);
+            // TODO Auto-generated constructor stub
+//            in.setDuration(300);
+//            out.setDuration(300);
+//            out.setAnimationListener(new Animation.AnimationListener() {
+//                @Override
+//                public void onAnimationStart(Animation animation) {
+//
+//                }
+//
+//                @Override
+//                public void onAnimationEnd(Animation animation) {
+//                    mBg.setVisibility(View.INVISIBLE);
+//                }
+//
+//                @Override
+//                public void onAnimationRepeat(Animation animation) {
+//
+//                }
+//            });
+//
+//            mPhotoView.enable();
+//            mPhotoView.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    mBg.startAnimation(out);
+//                    mPhotoView.animaTo(mInfo, new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            mParent.setVisibility(View.GONE);
+//                        }
+//                    });
+//                }
+//            });
+
+        }
+
+
+
+        @Override
+        public View getView(final int position, View convertView, ViewGroup parent) {
+            // TODO Auto-generated method stub
+            // listview每次得到一个item，都要view去绘制，通过getView方法得到view
+            // position为item的序号
+            View view = null;
+            if (convertView != null) {
+                view = convertView;
+                // 使用缓存的view,节约内存
+                // 当listview的item过多时，拖动会遮住一部分item，被遮住的item的view就是convertView保存着。
+                // 当滚动条回到之前被遮住的item时，直接使用convertView，而不必再去new view()
+
+            } else {
+                view = super.getView(position, convertView, parent);
+
+            }
+
+            // int数组，两种颜色
+            int[] colors = { Color.WHITE, Color.rgb(219, 238, 244) };//RGB颜色
+
+            view.setBackgroundColor(colors[position % 2]);// 每隔item之间颜色不同
+
+            final PhotoView p = (PhotoView) view.findViewById(R.id.tableItem_pv_image);
+//        p.setLayoutParams(new AbsListView.LayoutParams((int) (mContext.getResources().getDisplayMetrics().density * 100), (int) (mContext.getResources().getDisplayMetrics().density * 100)));
+//        p.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            p.setImageResource(R.drawable.test);
+            // 把PhotoView当普通的控件把触摸功能关掉
+            p.disenable();
+
+            p.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mInfo = p.getInfo();
+
+                    mPhotoView.setImageResource(R.drawable.no_preview_picture);
+                    mBg.startAnimation(in);
+                    mBg.setVisibility(View.VISIBLE);
+                    mParent.setVisibility(View.VISIBLE);;
+                    mPhotoView.animaFrom(mInfo);
+                }
+            });
+
+
+            return super.getView(position, view, parent);
+        }
+
+    }
+    /******************************************************************************/
+//    (1)newView：并不是每次都被调用的，它只在实例化的时候调用,数据增加的时候也会调用,
+//        但是在重绘(比如修改条目里的TextView的内容)的时候不会被调用
+//    (2)bindView：从代码中可以看出在绘制Item之前一定会调用bindView方法它在重绘的时候也同样被调用
+//  CursorAdapter还有一个重要的方法 public void changeCursor (Cursor cursor)：
+    public static class MyCursorAdapter extends CursorAdapter{
+
+        public MyCursorAdapter(Context context, Cursor c) {
+            super(context, c);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            // int数组，两种颜色
+            int[] colors = { Color.WHITE, Color.rgb(219, 238, 244) };//RGB颜色
+            View view = null;
+            view = super.getView(position, convertView, parent);
+            view.setBackgroundColor(colors[position % 2]);// 每隔item之间颜色不同
+
+            return view;
+        }
+
+
+        /**并不是每次都被调用的，它只在实例化的时候调用,数据增加的时候也会调用,
+            但是在重绘(比如修改条目里的TextView的内容)的时候不会被调用*/
+        @Override
+        public View newView(Context context, Cursor cursor, ViewGroup parent) {
+        // 获得 LayoutInflater 实例的三种方式:
+        // LayoutInflater inflater = getLayoutInflater();  //调用Activity的getLayoutInflater()
+        // LayoutInflater localinflater =(LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        // LayoutInflater inflater = LayoutInflater.from(context);
+
+            ViewHolder viewHolder= new ViewHolder();
+            // 将 layout 填充成"View"
+            LayoutInflater inflater=(LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE );
+            View view = inflater.inflate(R.layout.table_item,parent,false); // listview中每一项的布局
+
+            viewHolder.tvMainType = (TextView) view.findViewById(R.id.tableItem_tv_ProductName_maintype);
+            viewHolder.tvType1 = (TextView) view.findViewById(R.id.tableItem_tv_ProductName_type1);
+            viewHolder.tvConcreteness = (TextView) view.findViewById(R.id.tableItem_tv_ProductName_concreteness);
+            viewHolder.tvUnitPrice = (TextView) view.findViewById(R.id.tableItem_tv_UnitPrice);
+            viewHolder.tvNumber = (TextView) view.findViewById(R.id.tableItem_tv_Number);
+            viewHolder.tvPrice = (TextView) view.findViewById(R.id.tableItem_tv_Price);
+            viewHolder.pvImage = (PhotoView) view.findViewById(R.id.tableItem_pv_image);
+
+            view.setTag(viewHolder); // 设置进去
+
+            return view;
+        }
+
+        /**在绘制Item之前一定会调用bindView方法它在重绘的时候也同样被调用*/
+        @Override
+        public void bindView(View view, Context context, Cursor cursor) {
+
+            final ViewHolder viewHolder=(ViewHolder) view.getTag();   // 拿出来
+
+            String mainType = cursor.getString(Constant.TABLE_CONSUMPTION_maintype);
+            String type1 = cursor.getString(Constant.TABLE_CONSUMPTION_type1);
+            String concreteness = cursor.getString(Constant.TABLE_CONSUMPTION_concreteness);
+            String unitPrice = cursor.getString(Constant.TABLE_CONSUMPTION_unitprice);
+            String number = cursor.getString(Constant.TABLE_CONSUMPTION_number);
+            String price = cursor.getString(Constant.TABLE_CONSUMPTION_price);
+            String imageName = cursor.getString(Constant.TABLE_CONSUMPTION_image);
+//
+//            System.out.println(
+//                    "_id" + cursor.getString(Constant.TABLE_CONSUMPTION__id)+
+//                    "maintype:" + mainType+
+//                    "type1:" + type1+
+//                    "concreteness:" + concreteness+
+//                    "price:" + price+
+//                    "number:" + number+
+//                    "unitPrice:" + unitPrice+
+//
+//                    "date:" + cursor.getString(Constant.TABLE_CONSUMPTION_date)+"\n"+
+//                    "imageName:" + imageName
+//            );
+//            System.out.println("这张图片："+ Constant.IMAGE_PATH+"/"+imageName);
+            final Bitmap bitmap;
+            if(!TextUtils.isEmpty(imageName)) {
+                if (new File(Constant.IMAGE_PATH, imageName).exists())
+                    bitmap = ImageFactory.getBitmap(Constant.IMAGE_PATH + "/" + imageName);
+                else
+                    bitmap = ImageFactory.getBitmap(Constant.CACHE_IMAGE_PATH + "/" + "no_preview_picture.png");
+            }else{
+                bitmap = ImageFactory.getBitmap(Constant.CACHE_IMAGE_PATH + "/" + "no_preview_picture.png");
+            }
+
+            viewHolder.tvMainType.setText(mainType);
+            viewHolder.tvType1.setText(type1);
+            viewHolder.tvConcreteness.setText(concreteness+"-"+cursor.getString(Constant.TABLE_CONSUMPTION__id));
+            viewHolder.tvUnitPrice.setText(unitPrice);
+            viewHolder.tvNumber.setText(number);
+            viewHolder.tvPrice.setText(price);
+            viewHolder.pvImage.setImageBitmap(bitmap);
+
+
+            // 把PhotoView当普通的控件把触摸功能关掉
+            viewHolder.pvImage.disenable();
+            viewHolder.pvImage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mInfo =  viewHolder.pvImage.getInfo();
+                    mPhotoView.setImageBitmap(bitmap);
+                    mBg.startAnimation(in);
+                    mBg.setVisibility(View.VISIBLE);
+                    mParent.setVisibility(View.VISIBLE);;
+                    mPhotoView.animaFrom(mInfo);
+                }
+            });
+
+        }
+
+        static class ViewHolder{
+            TextView tvMainType;
+            TextView tvType1;
+            TextView tvConcreteness;
+            TextView tvUnitPrice;
+            TextView tvNumber;
+            TextView tvPrice;
+            PhotoView pvImage;
+        }
+    }
+
+
+
+
+
     /******************************************************************************/
     // 下面的是
     // implements GestureDetector.OnGestureListener  需要的
@@ -442,5 +762,6 @@ public class ReportForDayActivity extends FragmentActivity implements View.OnCli
     public void onLongPress(MotionEvent e) {
 
     }
+
 
 }

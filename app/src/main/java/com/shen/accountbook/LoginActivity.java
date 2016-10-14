@@ -58,6 +58,8 @@ public class LoginActivity extends Activity {
         setContentView(R.layout.login);
         initView();
         initListend();
+        initData();
+
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
@@ -165,6 +167,25 @@ public class LoginActivity extends Activity {
 //                                "密码" + SharePrefUtil.getString(getBaseContext(), SharePrefUtil.KEY.PASSWORK, ""), Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    /**
+     * 如果"记住登记密码"就将之前的填写
+     */
+    private void initData() {
+        Boolean auto = SharePrefUtil.getBoolean(this, SharePrefUtil.KEY.AUTO_ISCHECK, false);
+        Boolean remember = SharePrefUtil.getBoolean(this, SharePrefUtil.KEY.REMEMBER_ISCHECK, false);
+
+        mAotu.setChecked(auto);
+        mRemember.setChecked(remember);
+
+        if(remember){
+            String mSp_user = SharePrefUtil.getString(this, SharePrefUtil.KEY.USENAME, "");
+            String mSp_password = SharePrefUtil.getString(this, SharePrefUtil.KEY.PASSWORK, "");
+
+            mUsename.setText(mSp_user);
+            mPassword.setText(mSp_password);
+        }
     }
 
     @Override

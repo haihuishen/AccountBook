@@ -21,6 +21,8 @@ import com.shen.accountbook.RegisterActivity;
 import com.shen.accountbook.Utils.SharePrefUtil;
 import com.shen.accountbook.db.constant.Constant;
 import com.shen.accountbook.db.table.UserEx;
+import com.shen.accountbook.domain.UserInfo;
+import com.shen.accountbook.global.AccountBookApplication;
 
 /**
  * Created by shen on 8/25 0025.
@@ -76,7 +78,6 @@ public class LeftMenuFragment extends Fragment {
 
         View view = initView();         // 初始化界面
 
-
         bt_login.setOnClickListener(new View.OnClickListener() {
 
 
@@ -97,6 +98,8 @@ public class LeftMenuFragment extends Fragment {
         mLoginFinishLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                AccountBookApplication.setIsLogin(false);
+                AccountBookApplication.setUserInfo(null);
                 layout_logout.setVisibility(View.VISIBLE);
                 layout_login.setVisibility(View.GONE);
             }
@@ -119,52 +122,37 @@ public class LeftMenuFragment extends Fragment {
         mLoginFinishSex = (TextView) view.findViewById(R.id.layout_login_finish_tv_sex);
         mLoginFinishLogout = (Button) view.findViewById(R.id.layout_login_finish_btn_logout);
 
-        Boolean auto = SharePrefUtil.getBoolean(getActivity(), SharePrefUtil.KEY.AUTO_ISCHECK, false);
-        Boolean remember = SharePrefUtil.getBoolean(getActivity(), SharePrefUtil.KEY.REMEMBER_ISCHECK, false);
-        if(auto && remember){
-            mSp_user = SharePrefUtil.getString(getActivity(), SharePrefUtil.KEY.USENAME, "");
-            mSp_password = SharePrefUtil.getString(getActivity(), SharePrefUtil.KEY.PASSWORK, "");
-            System.out.println( "shen:"+mSp_user + ":" + mSp_password );
-            UserEx userEx = new UserEx(getActivity().getApplication());
-            Cursor cursor = userEx.Query(Constant.TABLE_USER,new String[]{"name,password,sex"}, "name=? and password=?",
-                    new String[]{mSp_user,mSp_password},null,null,null);
+        login();
 
-            if(cursor.getCount() >= 1) {
-                cursor.moveToNext();
-                c_name = cursor.getString(0);
-                c_password = cursor.getString(1);
-                c_sex = cursor.getInt(2);
-                if(c_sex == 1)
-                    mSex = "男";
-                else
-                    mSex = "女";
+        return view;
+    }
 
-//                System.out.println( "shen:"+c_name + ":" + c_password + ":" + c_sex);
-                if(mSp_user.equals(c_name) && mSp_password.equals(c_password)){
-                    layout_logout.setVisibility(View.GONE);
-                    layout_login.setVisibility(View.VISIBLE);
+    /**
+     * 根据登录标志，登录
+     */
+    private void login(){
+        if(AccountBookApplication.isLogin()){
+            UserInfo userInfo = AccountBookApplication.getUserInfo();
 
-                    mLoginFinishUser.setText(c_name);
-                    mLoginFinishSex.setText(mSex);
-                    mLoginFinishUser.setTextSize(25);
-                    mLoginFinishSex.setTextSize(25);
-                }
-                else{
-                    Toast.makeText(getActivity(),"自动登录失败：用户或密码错误", Toast.LENGTH_SHORT);
-                }
+            if(userInfo != null){
+                mLoginFinishUser.setText(userInfo.getUserName());
+                mLoginFinishSex.setText(userInfo.getSex() == 1? "男":"女");
+                mLoginFinishUser.setTextSize(25);
+                mLoginFinishSex.setTextSize(25);
+                layout_logout.setVisibility(View.GONE);
+                layout_login.setVisibility(View.VISIBLE);
             }
-
-        }else{
+        }
+        else{
+            AccountBookApplication.setIsLogin(false);
+            AccountBookApplication.setUserInfo(null);
             layout_logout.setVisibility(View.VISIBLE);
             layout_login.setVisibility(View.GONE);
         }
-
-        return view;
     }
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data){
         super.onActivityResult(requestCode, resultCode, data);
-
 
         if(requestCode == REQUEST){
             if(resultCode == LoginActivity.OK){
@@ -176,27 +164,34 @@ public class LeftMenuFragment extends Fragment {
                     Cursor cursor = userEx.Query(Constant.TABLE_USER,new String[]{"name,password,sex"}, "name=?",
                             new String[]{mLogin_User},null,null,null);
 
-                if(cursor.getCount() >= 1) {
-                    cursor.moveToNext();
-                    c_name = cursor.getString(0);
-                    c_password = cursor.getString(1);
-                    c_sex = cursor.getInt(2);
-                    if(c_sex == 1)
-                        mSex = "男";
-                    else
-                        mSex = "女";
+                    if(cursor.getCount() >= 1) {
+                        cursor.moveToNext();
+                        c_name = cursor.getString(0);
+                        c_password = cursor.getString(1);
+                        c_sex = cursor.getInt(2);
+                        if(c_sex == 1)
+                            mSex = "男";
+                        else
+                            mSex = "女";
 
-                    layout_logout.setVisibility(View.GONE);
-                    layout_login.setVisibility(View.VISIBLE);
+                        layout_logout.setVisibility(View.GONE);
+                        layout_login.setVisibility(View.VISIBLE);
 
-                    mLoginFinishUser.setText(c_name);
-                    mLoginFinishSex.setText(mSex);
-                    mLoginFinishUser.setTextSize(25);
-                    mLoginFinishSex.setTextSize(25);
-                }
+                        mLoginFinishUser.setText(c_name);
+                        mLoginFinishSex.setText(mSex);
+                        mLoginFinishUser.setTextSize(25);
+                        mLoginFinishSex.setTextSize(25);
+
+                        AccountBookApplication.setIsLogin(true);
+                        UserInfo userInfo = new UserInfo();
+                        userInfo.setUserName(c_name);
+                        userInfo.setPassWord(c_password);
+                        userInfo.setSex(c_sex);
+                        AccountBookApplication.setUserInfo(userInfo);
+                    }
                     else
                         Toast.makeText(getActivity(),"!(cursor.getCount() >= 1)",Toast.LENGTH_SHORT).show();
-               }
+                }
                 else
                     Toast.makeText(getActivity(),"传过来的 name 为空",Toast.LENGTH_SHORT).show();
             }

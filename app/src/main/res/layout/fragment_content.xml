@@ -1,48 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent">
-
-    <include layout="@layout/title_bar" />
-
-    <com.shen.accountbook.view.NoScrollViewPager
-        android:id="@+id/vp_content"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_height="match_parent">
+
+        <include layout="@layout/title_bar" />
+
+        <com.shen.accountbook.view.NoScrollViewPager
+            android:id="@+id/vp_content"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
 
-    <!-- 下面的"标题" -->
-    <RadioGroup
-        android:id="@+id/rg_group"
+        <!-- 下面的"标题" -->
+        <RadioGroup
+            android:id="@+id/rg_group"
+            android:layout_width="match_parent"
+            android:layout_height="68dp"
+            android:background="@drawable/bottom_tab_bg"
+            android:gravity="center"
+            android:orientation="horizontal" >
+
+            <!-- android:drawableTop="@drawable/tab_home_selector"  图片选择器
+                 android:checked="true" 默认选中
+             -->
+            <RadioButton
+                android:id="@+id/rb_home"
+                style="@style/Bottom_Tab_Style"
+                android:drawableTop="@drawable/tab_home_selector"
+                android:checked="true"
+                android:text="首页" />
+
+            <RadioButton
+                android:id="@+id/rb_add"
+                style="@style/Bottom_Tab_Style"
+                android:drawableTop="@drawable/tab_smart_selector"
+                android:text="添加消费" />
+
+            <RadioButton
+                android:id="@+id/rb_other"
+                style="@style/Bottom_Tab_Style"
+                android:drawableTop="@drawable/tab_setting_selector"
+                android:text="其他" />
+
+        </RadioGroup>
+    </LinearLayout>
+
+
+    <FrameLayout
+        android:id="@+id/parent"
         android:layout_width="match_parent"
-        android:layout_height="68dp"
-        android:background="@drawable/bottom_tab_bg"
-        android:gravity="center"
-        android:orientation="horizontal" >
+        android:layout_height="match_parent"
+        android:visibility="gone">
 
-        <!-- android:drawableTop="@drawable/tab_home_selector"  图片选择器
-        	 android:checked="true" 默认选中
-         -->
-        <RadioButton
-            android:id="@+id/rb_home"
-            style="@style/Bottom_Tab_Style"
-            android:drawableTop="@drawable/tab_home_selector"
-            android:checked="true"
-            android:text="首页" />
+        <ImageView
+            android:id="@+id/bg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#e0000000" />
 
-        <RadioButton
-            android:id="@+id/rb_add"
-            style="@style/Bottom_Tab_Style"
-            android:drawableTop="@drawable/tab_smart_selector"
-            android:text="添加消费" />
+        <com.bm.library.PhotoView
+            android:id="@+id/img"
+            android:scaleType="fitCenter"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </FrameLayout>
 
-        <RadioButton
-            android:id="@+id/rb_other"
-            style="@style/Bottom_Tab_Style"
-            android:drawableTop="@drawable/tab_setting_selector"
-            android:text="其他" />
-
-    </RadioGroup>
-</LinearLayout>
+</RelativeLayout>

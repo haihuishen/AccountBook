@@ -24,6 +24,7 @@ import com.shen.accountbook.Utils.SharePrefUtil;
 import com.shen.accountbook.clander.SpecialCalendar;
 import com.shen.accountbook.db.constant.Constant;
 import com.shen.accountbook.db.table.TableEx;
+import com.shen.accountbook.global.AccountBookApplication;
 import com.shen.accountbook.widget.OnWheelChangedListener;
 import com.shen.accountbook.widget.WheelView;
 import com.shen.accountbook.widget.adapters.ArrayWheelAdapter;
@@ -471,7 +472,7 @@ public class ReportForY_LineChar_Activity extends FragmentActivity implements Vi
         for (int i = 0; i < maxNumberOfLines; i++) {
             numberOfPoints[i] = 12;
             for (int j = 0; j < 12; j++) {
-                Cursor cursor = tableEx.Query(Constant.TABLE_CONSUMPTION, new String[]{"sum(price)"}, "date like ?", new String[]{year[i] + "-" + (j+1) + "-%"}, null, null, null);
+                Cursor cursor = tableEx.Query(Constant.TABLE_CONSUMPTION, new String[]{"sum(price)"}, "date like ? and user=?", new String[]{year[i] + "-" + (j+1) + "-%", AccountBookApplication.getUserInfo().getUserName()}, null, null, null);
 
                 if (cursor.getCount() == 0) {
                     NumbersTab[i][j] = 0;
@@ -692,7 +693,7 @@ public class ReportForY_LineChar_Activity extends FragmentActivity implements Vi
             numberOfPoints[0] = 12;
 
             for (int i = 0; i < 12; i++) {
-                Cursor cursor = tableEx.Query(Constant.TABLE_CONSUMPTION, new String[]{"sum(price)"}, "date like ?", new String[]{c_year + "-" + (i+1) + "-%"}, null, null, null);
+                Cursor cursor = tableEx.Query(Constant.TABLE_CONSUMPTION, new String[]{"sum(price)"}, "date like ? and user=?", new String[]{c_year + "-" + (i+1) + "-%", AccountBookApplication.getUserInfo().getUserName()}, null, null, null);
 
                 if (cursor.getCount() == 0)
                     randomNumbersTab[0][i] = 0;

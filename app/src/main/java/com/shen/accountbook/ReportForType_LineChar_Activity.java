@@ -25,6 +25,7 @@ import com.shen.accountbook.clander.SpecialCalendar;
 import com.shen.accountbook.db.constant.Constant;
 import com.shen.accountbook.db.model.TypeModelManage;
 import com.shen.accountbook.db.table.TableEx;
+import com.shen.accountbook.global.AccountBookApplication;
 import com.shen.accountbook.widget.OnWheelChangedListener;
 import com.shen.accountbook.widget.WheelView;
 import com.shen.accountbook.widget.adapters.ArrayWheelAdapter;
@@ -306,9 +307,9 @@ public class ReportForType_LineChar_Activity extends FragmentActivity implements
                 for (int j = 0; j < numberOfPoints[i]; j++) {   // 一个个点添加
                     Cursor cursor = null;
                     if(cb_type1.isChecked()) {
-                        cursor = tableEx.Query(Constant.TABLE_CONSUMPTION, new String[]{"sum(price)"}, "date like ? and mainType=? and type1=?", new String[]{year + "-" + month + "-"+(j+1), mainType, type1}, null, null, null);
+                        cursor = tableEx.Query(Constant.TABLE_CONSUMPTION, new String[]{"sum(price)"}, "date like ? and mainType=? and type1=? and user=?", new String[]{year + "-" + month + "-"+(j+1), mainType, type1, AccountBookApplication.getUserInfo().getUserName()}, null, null, null);
                     }else{
-                        cursor = tableEx.Query(Constant.TABLE_CONSUMPTION, new String[]{"sum(price)"}, "date like ? and mainType=?", new String[]{year + "-" + month + "-"+(j+1), mainType}, null, null, null);
+                        cursor = tableEx.Query(Constant.TABLE_CONSUMPTION, new String[]{"sum(price)"}, "date like ? and mainType=? and user=?", new String[]{year + "-" + month + "-"+(j+1), mainType, AccountBookApplication.getUserInfo().getUserName()}, null, null, null);
                     }
                     if (cursor.getCount() == 0) {
                         NumbersTab[i][j] = 0;
@@ -326,9 +327,9 @@ public class ReportForType_LineChar_Activity extends FragmentActivity implements
                 for (int j = 0; j < numberOfPoints[i]; j++) {   // 一个个点添加
                     Cursor cursor = null;
                     if(cb_type1.isChecked()) {
-                        cursor = tableEx.Query(Constant.TABLE_CONSUMPTION, new String[]{"sum(price)"}, "date like ? and mainType=? and type1=?", new String[]{year + "-" + (j + 1) + "-%", mainType, type1}, null, null, null);
+                        cursor = tableEx.Query(Constant.TABLE_CONSUMPTION, new String[]{"sum(price)"}, "date like ? and mainType=? and type1=? and user=?", new String[]{year + "-" + (j + 1) + "-%", mainType, type1, AccountBookApplication.getUserInfo().getUserName()}, null, null, null);
                     }else{
-                        cursor = tableEx.Query(Constant.TABLE_CONSUMPTION, new String[]{"sum(price)"}, "date like ? and mainType=?", new String[]{year + "-" + (j + 1) + "-%", mainType}, null, null, null);
+                        cursor = tableEx.Query(Constant.TABLE_CONSUMPTION, new String[]{"sum(price)"}, "date like ? and mainType=? and user=?", new String[]{year + "-" + (j + 1) + "-%", mainType, AccountBookApplication.getUserInfo().getUserName()}, null, null, null);
                     }
                     if (cursor.getCount() == 0) {
                         NumbersTab[i][j] = 0;
@@ -577,7 +578,7 @@ public class ReportForType_LineChar_Activity extends FragmentActivity implements
             numberOfPoints[0] = 12;
 
             for (int i = 0; i < 12; i++) {
-                Cursor cursor = tableEx.Query(Constant.TABLE_CONSUMPTION, new String[]{"sum(price)"}, "date like ?", new String[]{c_year + "-" + (i+1) + "-%"}, null, null, null);
+                Cursor cursor = tableEx.Query(Constant.TABLE_CONSUMPTION, new String[]{"sum(price)"}, "date like ? and user=?", new String[]{c_year + "-" + (i+1) + "-%", AccountBookApplication.getUserInfo().getUserName()}, null, null, null);
 
                 if (cursor.getCount() == 0)
                     randomNumbersTab[0][i] = 0;

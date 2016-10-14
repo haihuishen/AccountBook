@@ -1,15 +1,20 @@
 package com.shen.accountbook;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.Toast;
 
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import com.jeremyfeinstein.slidingmenu.lib.app.SlidingFragmentActivity;
 import com.shen.accountbook.fragment.ContentFragment;
 import com.shen.accountbook.fragment.LeftMenuFragment;
+import com.shen.accountbook.fragment.pages.AddPager;
 
 /**
  * Created by shen on 8/15 0015.
@@ -42,6 +47,8 @@ public class MainActivity extends SlidingFragmentActivity{
         slidingMenu.setBehindOffset(width * 120 / 320);
 
         initFragment();
+
+
 
     }
 
@@ -95,6 +102,5 @@ public class MainActivity extends SlidingFragmentActivity{
         ContentFragment fragment = (ContentFragment) fm.findFragmentByTag(TAG_CONTENT);
         return fragment;
     }
-
 
 }

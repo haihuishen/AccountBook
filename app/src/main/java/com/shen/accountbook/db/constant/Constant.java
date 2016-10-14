@@ -1,5 +1,7 @@
 package com.shen.accountbook.db.constant;
 
+import android.os.Environment;
+
 import com.shen.accountbook.db.model.MainTypeModel;
 
 import java.util.List;
@@ -19,6 +21,19 @@ public class Constant {
     public final static String TABLE_TYPE1 = "Type1";
     public final static String TABLE_CONSUMPTION = "consumption";
 
+    // consumption表的字段
+    public final static int TABLE_CONSUMPTION__id = 0;
+    public final static int TABLE_CONSUMPTION_user = 1;
+    public final static int TABLE_CONSUMPTION_maintype = 2;
+    public final static int TABLE_CONSUMPTION_type1 = 3;
+    public final static int TABLE_CONSUMPTION_concreteness = 4;
+    public final static int TABLE_CONSUMPTION_price = 5;
+    public final static int TABLE_CONSUMPTION_number = 6;
+    public final static int TABLE_CONSUMPTION_unitprice = 7;
+    public final static int TABLE_CONSUMPTION_image = 8;
+    public final static int TABLE_CONSUMPTION_date = 9;
+
+
 
     public final static String[] dialogYear = new String[]{
             "1980","1981","1982","1983","1984","1985","1986","1987","1988","1989", 
@@ -36,5 +51,9 @@ public class Constant {
 
     public final static List<MainTypeModel> mainTypeList = null;
 
+    public final static String CACHE_IMAGE_PATH = Environment.getExternalStorageDirectory().getAbsolutePath() +
+            "/AccountBook/CacheImage";
+    public final static String IMAGE_PATH = Environment.getExternalStorageDirectory().getAbsolutePath() +
+            "/AccountBook/Image";
 
 }

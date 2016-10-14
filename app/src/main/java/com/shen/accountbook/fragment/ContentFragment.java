@@ -1,28 +1,48 @@
 package com.shen.accountbook.fragment;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
+import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.widget.AbsListView;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.bm.library.Info;
+import com.bm.library.PhotoView;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import com.shen.accountbook.MainActivity;
 import com.shen.accountbook.R;
+import com.shen.accountbook.Utils.ImageFactory;
+import com.shen.accountbook.Utils.SharePrefUtil;
+import com.shen.accountbook.db.constant.Constant;
 import com.shen.accountbook.fragment.pages.AddPager;
 import com.shen.accountbook.fragment.pages.BasePager;
 import com.shen.accountbook.fragment.pages.MainPager;
 import com.shen.accountbook.fragment.pages.OtherPager;
 import com.shen.accountbook.view.NoScrollViewPager;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Locale;
 
 /**
  * Created by shen on 8/25 0025.
@@ -37,7 +57,6 @@ public class ContentFragment extends Fragment {
 
     public NoScrollViewPager mViewPager;
 
-
     /** 下面的"底栏标签"(RadioButton)的 组
      * <p>private RadioGroup rgGroup;
      */
@@ -51,6 +70,21 @@ public class ContentFragment extends Fragment {
 
     TextView tv_title;
     ImageButton btnMenu;
+
+    /** 预览图片控件*/
+    private PhotoView pv_camaraPhoto;
+    private LinearLayout linearLayout_pv;
+
+    private Bitmap bitmap;
+
+    View mParent;
+    View mBg;
+    PhotoView mPhotoView;
+    Info mInfo;
+
+    AlphaAnimation in;
+    AlphaAnimation out;
+
     /**
      *  Fragment创建
      */
@@ -88,10 +122,16 @@ public class ContentFragment extends Fragment {
         rgGroup = (RadioGroup) view.findViewById(R.id.rg_group);
         btnMenu = (ImageButton) view.findViewById(R.id.btn_menu);
 
+        mParent = view.findViewById(R.id.parent);
+        mBg = view.findViewById(R.id.bg);
+        mPhotoView = (PhotoView) view.findViewById(R.id.img);
+
         return view;
     }
 
     private void initData(){
+
+
 
         mPagers = new ArrayList<BasePager>();
         // 添加五个标签页
@@ -141,6 +181,28 @@ public class ContentFragment extends Fragment {
         });
 
         rgGroup.check(R.id.rb_home);   // 默认选中"首页"
+
+
+        in = new AlphaAnimation(0, 1);
+        out = new AlphaAnimation(1, 0);
+
+        in.setDuration(300);
+        out.setDuration(300);
+        out.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+            }
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                mBg.setVisibility(View.INVISIBLE);
+            }
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+        });
+
+        bitmap = ImageFactory.getBitmap(Constant.CACHE_IMAGE_PATH +"/no_preview_picture.png");
+
     }
 
     /**
@@ -190,6 +252,85 @@ public class ContentFragment extends Fragment {
             // pager.initData();
             container.addView(view);
 
+            // 如果："添加页面"
+            if(pager.getClass().equals(AddPager.class)){
+                linearLayout_pv = (LinearLayout) view.findViewById(R.id.linearLayout_pv);
+
+                pv_camaraPhoto = (PhotoView) view.findViewById(R.id.pager_add_pv_image);
+                pv_camaraPhoto.disenable();// 把PhotoView当普通的控件把触摸功能关掉
+                pv_camaraPhoto.setImageBitmap(bitmap);
+
+                Button btnCamera = (Button) view.findViewById(R.id.pager_add_btn_camera);     // 拍照按钮
+                Button btnClear = (Button) view.findViewById(R.id.pager_add_btn_clear);     // 清除按钮
+
+
+                mPhotoView.setImageResource(R.drawable.no_preview_picture);
+
+                btnCamera.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+//                        File file = new File(mActivity.getCacheDir(),);
+//                        if (!file.exists()) {
+//                            boolean b = file.mkdirs();
+//                            Toast.makeText(mActivity, "创建文件:"+b, Toast.LENGTH_LONG).show();
+//                        }else{
+//                            Toast.makeText(mActivity, "文件已经存在", Toast.LENGTH_LONG).show();
+//                        }
+//
+//                        String name = new DateFormat().format("yyyyMMdd_hhmmss", Calendar.getInstance(Locale.CHINA)) + ".jpg";
+//                        Toast.makeText(mActivity, name, Toast.LENGTH_LONG).show();
+                        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                        File file = new File(Constant.CACHE_IMAGE_PATH ,"CacheImage.jpg");
+                        intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
+
+                        startActivityForResult(intent, 1);
+                    }
+                });
+                btnClear.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        SharePrefUtil.saveBoolean(mActivity,SharePrefUtil.IMAGE_KEY.IS_ADD_IMAGE,false);
+
+                        bitmap = ImageFactory.getBitmap(Constant.CACHE_IMAGE_PATH +"/no_preview_picture.png");
+                        pv_camaraPhoto.setImageBitmap(bitmap);              // 将图片显示在ImageView里
+                        mPhotoView.setImageBitmap(bitmap);
+                    }
+                });
+
+                mPhotoView.enable();
+                mPhotoView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        System.out.println("草，来到这里了3");
+                        Toast.makeText(mActivity, "好像是这个3", Toast.LENGTH_LONG).show();
+                        mBg.startAnimation(out);
+                        mPhotoView.animaTo(mInfo, new Runnable() {
+                            @Override
+                            public void run() {
+                                mParent.setVisibility(View.GONE);
+                            }
+                        });
+                    }
+                });
+
+                linearLayout_pv.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+//                        pv_camaraPhoto.setLayoutParams(new LinearLayout.LayoutParams((int) (getResources().getDisplayMetrics().density * 100), (int) (getResources().getDisplayMetrics().density * 100)));
+                        mInfo = pv_camaraPhoto.getInfo();
+
+//                        mPhotoView.setImageResource(R.drawable.no_preview_picture);
+                        mPhotoView.setImageBitmap(bitmap);
+                        mBg.startAnimation(in);
+                        mBg.setVisibility(View.VISIBLE);
+                        mParent.setVisibility(View.VISIBLE);;
+                        mPhotoView.animaFrom(mInfo);
+                        Toast.makeText(mActivity,"点击了预览图片",Toast.LENGTH_SHORT).show();
+
+                    }
+                });
+            }
+
             return view;
         }
 
@@ -202,6 +343,59 @@ public class ContentFragment extends Fragment {
             container.removeView((View) object);
         }
 
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+//        //将值传入AddPager/ContentFragment
+//        this.getSupportFragmentManager().findFragmentByTag(ContentFragment.class.getSimpleName()).onActivityResult(requestCode, resultCode, data);
+
+        System.out.println("草，来到这里了2");
+        Toast.makeText(mActivity, "好像是这个2", Toast.LENGTH_LONG).show();
+        // TODO Auto-generated method stub
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == Activity.RESULT_OK) {
+//            String sdStatus = Environment.getExternalStorageState();
+//            if (!sdStatus.equals(Environment.MEDIA_MOUNTED)) { // 检测sd是否可用
+//                Log.i("TestFile","SD card is not avaiable/writeable right now.");
+//                return;
+//            }
+//            String name = new DateFormat().format("yyyyMMdd_hhmmss", Calendar.getInstance(Locale.CHINA)) + ".jpg";
+//            Toast.makeText(mActivity, name, Toast.LENGTH_LONG).show();
+//            Bundle bundle = data.getExtras();
+//            bitmap = (Bitmap) bundle.get("data");// 获取相机返回的数据，并转换为Bitmap图片格式
+
+//            FileOutputStream b = null;
+//            //???????????????????????????????为什么不能直接保存在系统相册位置呢？？？？？？？？？？？？
+//            File file = new File("data/data/com.example.shen.mycamera/image/");
+//            file.mkdirs();// 创建文件夹
+//            String fileName = "data/data/com.example.shen.mycamera/image/"+name;
+//            System.out.println("文件大小"+file.length()+"");
+//            try {
+//                b = new FileOutputStream(fileName);
+//                // 图片压缩
+//                // ***参1:图片格式
+//                // ***参2:压缩比例0-100; %
+//                // ***参3:输出流 (压缩到哪里)
+//                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, b);// 把数据写入文件
+//            } catch (FileNotFoundException e) {
+//                e.printStackTrace();
+//            } finally {
+//                try {
+//                    b.flush();
+//                    b.close();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+
+            SharePrefUtil.saveBoolean(mActivity,SharePrefUtil.IMAGE_KEY.IS_ADD_IMAGE,true);
+            System.out.println("拍照完后SharePrefUtil.IMAGE_KEY.IS_ADD_IMAGE："+SharePrefUtil.getBoolean(mActivity, SharePrefUtil.IMAGE_KEY.IS_ADD_IMAGE, false));
+            bitmap = ImageFactory.ratio(Constant.CACHE_IMAGE_PATH +"/CacheImage.jpg", 200, 200);
+            pv_camaraPhoto.setImageBitmap(bitmap);// 将图片显示在ImageView里
+        }
     }
 
 }

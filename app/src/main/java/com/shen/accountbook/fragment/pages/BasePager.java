@@ -1,6 +1,9 @@
 package com.shen.accountbook.fragment.pages;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.FrameLayout;
@@ -98,4 +101,5 @@ public abstract class BasePager {
 	public void initData() {
 
 	}
+
 }

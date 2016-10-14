@@ -11,6 +11,8 @@ import com.shen.accountbook.ReportForDayActivity;
 import com.shen.accountbook.ReportForM_LineChar_Activity;
 import com.shen.accountbook.ReportForType_LineChar_Activity;
 import com.shen.accountbook.ReportForY_LineChar_Activity;
+import com.shen.accountbook.Utils.ToastUtil;
+import com.shen.accountbook.global.AccountBookApplication;
 
 /**
  * Created by shen on 9/9 0009.
@@ -31,7 +33,7 @@ public class MainPager extends BasePager implements View.OnClickListener{
     public View initView() {
 
         // 將 R.layout.base_pager布局 填充成 view,作为其布局
-		View view = View.inflate(mActivity, R.layout.pager_main, null);
+        View view = View.inflate(mActivity, R.layout.pager_main, null);
 
         btn_report_day = (Button) view.findViewById(R.id.btn_D);
         btn_report_month = (Button) view.findViewById(R.id.btn_M);
@@ -52,27 +54,30 @@ public class MainPager extends BasePager implements View.OnClickListener{
     @Override
     public void onClick(View v) {
         Intent intent;
-        switch (v.getId()){
-            case R.id.btn_D:
-                intent = new Intent(mActivity.getBaseContext(), ReportForDayActivity.class);
-                mActivity.startActivity(intent);
-                break;
+        if(AccountBookApplication.isLogin()){
+            switch (v.getId()){
+                case R.id.btn_D:
+                    intent = new Intent(mActivity.getBaseContext(), ReportForDayActivity.class);
+                    mActivity.startActivity(intent);
+                    break;
 
-            case R.id.btn_M:
-                intent = new Intent(mActivity.getBaseContext(), ReportForM_LineChar_Activity.class);
-                mActivity.startActivity(intent);
-                break;
+                case R.id.btn_M:
+                    intent = new Intent(mActivity.getBaseContext(), ReportForM_LineChar_Activity.class);
+                    mActivity.startActivity(intent);
+                    break;
 
-            case R.id.btn_Y:
-                intent = new Intent(mActivity.getBaseContext(), ReportForY_LineChar_Activity.class);
-                mActivity.startActivity(intent);
-                break;
+                case R.id.btn_Y:
+                    intent = new Intent(mActivity.getBaseContext(), ReportForY_LineChar_Activity.class);
+                    mActivity.startActivity(intent);
+                    break;
 
-            case R.id.btn_type:
-                intent = new Intent(mActivity.getBaseContext(), ReportForType_LineChar_Activity.class);
-                mActivity.startActivity(intent);
-                break;
-            default:break;
-        }
+                case R.id.btn_type:
+                    intent = new Intent(mActivity.getBaseContext(), ReportForType_LineChar_Activity.class);
+                    mActivity.startActivity(intent);
+                    break;
+                default:break;
+            }
+        }else
+            ToastUtil.show("请登陆后再操作!");
     }
 }
