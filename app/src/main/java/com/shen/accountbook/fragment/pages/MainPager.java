@@ -5,9 +5,9 @@ import android.content.Intent;
 import android.view.View;
 import android.widget.Button;
 
-import com.shen.accountbook.LineChartActivity;
 import com.shen.accountbook.R;
-import com.shen.accountbook.ReportForDayActivity;
+import com.shen.accountbook.ReportForD2_Activity;
+import com.shen.accountbook.ReportForD_Activity;
 import com.shen.accountbook.ReportForM_LineChar_Activity;
 import com.shen.accountbook.ReportForType_LineChar_Activity;
 import com.shen.accountbook.ReportForY_LineChar_Activity;
@@ -24,6 +24,11 @@ public class MainPager extends BasePager implements View.OnClickListener{
     private Button btn_report_year;
     private Button btn_report_type;
 
+    private Button btn_report_day2;
+    private Button btn_report_month2;
+    private Button btn_report_year2;
+    private Button btn_report_type2;
+
     public MainPager(Activity activity) {
         super(activity);
         initDate();
@@ -39,6 +44,11 @@ public class MainPager extends BasePager implements View.OnClickListener{
         btn_report_month = (Button) view.findViewById(R.id.btn_M);
         btn_report_year = (Button) view.findViewById(R.id.btn_Y);
         btn_report_type = (Button) view.findViewById(R.id.btn_type);
+
+        btn_report_day2 = (Button) view.findViewById(R.id.btn_D2);
+        btn_report_month2 = (Button) view.findViewById(R.id.btn_M2);
+        btn_report_year2 = (Button) view.findViewById(R.id.btn_Y2);
+        btn_report_type2 = (Button) view.findViewById(R.id.btn_type2);
         return view;
     }
 
@@ -49,6 +59,11 @@ public class MainPager extends BasePager implements View.OnClickListener{
         btn_report_month.setOnClickListener(this);
         btn_report_year.setOnClickListener(this);
         btn_report_type.setOnClickListener(this);
+
+        btn_report_day2.setOnClickListener(this);
+        btn_report_month2.setOnClickListener(this);
+        btn_report_year2.setOnClickListener(this);
+        btn_report_type2.setOnClickListener(this);
     }
 
     @Override
@@ -57,7 +72,7 @@ public class MainPager extends BasePager implements View.OnClickListener{
         if(AccountBookApplication.isLogin()){
             switch (v.getId()){
                 case R.id.btn_D:
-                    intent = new Intent(mActivity.getBaseContext(), ReportForDayActivity.class);
+                    intent = new Intent(mActivity.getBaseContext(), ReportForD_Activity.class);
                     mActivity.startActivity(intent);
                     break;
 
@@ -73,6 +88,11 @@ public class MainPager extends BasePager implements View.OnClickListener{
 
                 case R.id.btn_type:
                     intent = new Intent(mActivity.getBaseContext(), ReportForType_LineChar_Activity.class);
+                    mActivity.startActivity(intent);
+                    break;
+
+                case R.id.btn_D2:
+                    intent = new Intent(mActivity.getBaseContext(), ReportForD2_Activity.class);
                     mActivity.startActivity(intent);
                     break;
                 default:break;
